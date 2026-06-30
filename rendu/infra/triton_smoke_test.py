@@ -12,7 +12,7 @@ def get(url, timeout=10):
         return response.status, response.read().decode("utf-8")
 
 
-def post_json(url, payload, timeout=120):
+def post_json(url, payload, timeout=240):
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
         url,

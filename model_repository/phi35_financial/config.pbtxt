@@ -1,21 +1,20 @@
 # Triton backend to use
 backend: "python"
 
-# Hugging face model path. Parameters must follow this
-# key/value structure
+# Triton Python backend proxies requests to the validated Ollama deployment.
 parameters: {
-  key: "huggingface_model",
-  value: {string_value: "microsoft/Phi-3-mini-4k-instruct"}
+  key: "ollama_url",
+  value: {string_value: "http://host.docker.internal:11434"}
 }
 parameters: {
-  key: "adapter_path",
-  value: {string_value: "/opt/tritonserver/models/phi3_financial"}
+  key: "ollama_model",
+  value: {string_value: "phi35-financial"}
 }
 # The maximum number of tokens to generate in response
 # to our input
 parameters: {
   key: "max_output_length",
-  value: {string_value: "512"}
+  value: {string_value: "80"}
 }
 parameters: {
   key: "temperature",
