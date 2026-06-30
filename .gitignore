@@ -1,2 +1,13 @@
 datasets/dataset_v0.json
 .DS_Store
+
+# Local/generated artifacts
+__pycache__/
+*.py[cod]
+*.log
+*.exe
+ollama-winget/
+
+# Runtime output
+rendu/devweb/server.stdout.log
+rendu/devweb/server.stderr.log

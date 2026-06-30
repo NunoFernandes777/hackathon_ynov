@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TechCorp Financial Chat</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">TechCorp Industries</p>
+          <h1>Phi-3.5 Financial</h1>
+        </div>
+
+        <section class="status-panel">
+          <div class="status-row">
+            <span id="ollamaDot" class="dot"></span>
+            <span>Ollama</span>
+          </div>
+          <div class="status-row">
+            <span id="tritonDot" class="dot"></span>
+            <span>Triton</span>
+          </div>
+        </section>
+
+        <label>
+          Serveur
+          <select id="provider">
+            <option value="ollama">Ollama : localhost:11434</option>
+            <option value="triton">Triton : localhost:8000</option>
+          </select>
+        </label>
+
+        <label>
+          Modele Ollama
+          <input id="model" value="phi35-financial" />
+        </label>
+
+        <label>
+          Temperature
+          <input id="temperature" type="range" min="0" max="1" step="0.05" value="0.4" />
+          <span id="tempValue">0.40</span>
+        </label>
+
+        <button id="clearBtn" type="button">Nouvelle conversation</button>
+      </aside>
+
+      <section class="chat">
+        <header class="chat-header">
+          <div>
+            <p class="eyebrow">Assistant financier interne</p>
+            <h2>Analyse, budget, investissement, risques</h2>
+          </div>
+          <span id="connectionLabel" class="pill">Verification...</span>
+        </header>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <form id="chatForm" class="composer">
+          <textarea id="prompt" rows="2" placeholder="Posez une question financiere..." required></textarea>
+          <button id="sendBtn" type="submit">Envoyer</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
