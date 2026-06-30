@@ -10,6 +10,9 @@ const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 360000);
 const DEFAULT_MAX_TOKENS = Number(process.env.MAX_TOKENS || 384);
 
 const publicDir = __dirname;
+const LANGUAGE_INSTRUCTION =
+  "Answer entirely in the same language as the latest user message. " +
+  "If the user writes in French, answer only in French. Do not switch to English mid-answer.";
 
 function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -51,14 +54,23 @@ function getLastUserMessage(messages) {
   return [...messages].reverse().find((message) => message.role === "user")?.content || "";
 }
 
+function withSystemInstruction(messages) {
+  return [{ role: "system", content: LANGUAGE_INSTRUCTION }, ...messages];
+}
+
 function formatPrompt(messages) {
   const turns = messages
     .filter((message) => ["user", "assistant"].includes(message.role) && message.content)
     .map((message) => {
-      const role = message.role === "user" ? "User" : "Assistant";
+      const role = message.role === "user" ? "Utilisateur" : "Assistant";
       return `${role}: ${message.content}`;
     });
-  return `${turns.join("\n")}\nAssistant:`;
+  return `${LANGUAGE_INSTRUCTION}\n\n${turns.join("\n")}\nAssistant:`;
+}
+
+function formatTritonPrompt(messages, fallbackPrompt = "") {
+  const latestUserMessage = getLastUserMessage(messages) || fallbackPrompt;
+  return `${LANGUAGE_INSTRUCTION}\n\nMessage utilisateur:\n${latestUserMessage}\n\nReponse:`;
 }
 
 async function proxyOllamaChat(payload) {
@@ -75,7 +87,7 @@ async function proxyOllamaChat(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
-      messages,
+      messages: withSystemInstruction(messages),
       stream: false,
       options,
     }),
@@ -114,7 +126,7 @@ async function proxyOllamaChat(payload) {
 
 async function proxyTritonChat(payload) {
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  const prompt = messages.length ? formatPrompt(messages) : payload.prompt || getLastUserMessage(messages);
+  const prompt = formatTritonPrompt(messages, payload.prompt || "");
   if (!prompt.trim()) {
     throw new Error("Triton requires a non-empty prompt.");
   }

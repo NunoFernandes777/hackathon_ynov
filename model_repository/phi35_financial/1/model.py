@@ -19,7 +19,10 @@ class TritonPythonModel:
             "string_value", os.environ.get("OLLAMA_MODEL", "phi35-financial")
         )
         self.max_output_length = int(
-            self.model_params.get("max_output_length", {}).get("string_value", "1024")
+            self.model_params.get("max_output_length", {}).get("string_value", "220")
+        )
+        self.request_timeout_seconds = int(
+            self.model_params.get("request_timeout_seconds", {}).get("string_value", "360")
         )
         self.temperature = float(self.model_params.get("temperature", {}).get("string_value", "0.4"))
         self.top_p = float(self.model_params.get("top_p", {}).get("string_value", "0.9"))
@@ -45,6 +48,7 @@ class TritonPythonModel:
                 "temperature": self.temperature,
                 "top_p": self.top_p,
                 "num_predict": self.max_output_length,
+                "stop": ["\nUtilisateur:", "\nUser:", "\nAssistant:", "Assistant:"],
             },
         }
         data = json.dumps(payload).encode("utf-8")
@@ -56,10 +60,10 @@ class TritonPythonModel:
         )
 
         try:
-            with urllib.request.urlopen(request, timeout=180) as response:
+            with urllib.request.urlopen(request, timeout=self.request_timeout_seconds) as response:
                 result = json.loads(response.read().decode("utf-8"))
             text = (result.get("response") or "").strip()
-        except urllib.error.URLError as error:
+        except (TimeoutError, urllib.error.URLError) as error:
             text = f"Triton could not reach Ollama at {self.ollama_url}: {error}"
 
         tensor = pb_utils.Tensor("text_output", np.array([text], dtype=np.object_))

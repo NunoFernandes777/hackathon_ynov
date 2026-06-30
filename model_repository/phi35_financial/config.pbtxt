@@ -11,10 +11,14 @@ parameters: {
   value: {string_value: "phi35-financial"}
 }
 # The maximum number of tokens to generate in response.
-# Kept high enough to avoid visibly truncated Triton answers.
+# Kept conservative to avoid CPU-local timeouts through Triton -> Ollama.
 parameters: {
   key: "max_output_length",
-  value: {string_value: "1024"}
+  value: {string_value: "220"}
+}
+parameters: {
+  key: "request_timeout_seconds",
+  value: {string_value: "360"}
 }
 parameters: {
   key: "temperature",
