@@ -38,7 +38,10 @@ def main():
                 "name": "text_input",
                 "shape": [1],
                 "datatype": "BYTES",
-                "data": ["Explain compound interest in one sentence."],
+                "data": [
+                    "Explain diversification in a financial portfolio in 8 concise bullet points. "
+                    "Include risk reduction, correlation, asset classes, and limitations."
+                ],
             }
         ],
         "outputs": [{"name": "text_output"}],

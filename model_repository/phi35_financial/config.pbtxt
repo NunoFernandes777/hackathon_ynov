@@ -10,11 +10,11 @@ parameters: {
   key: "ollama_model",
   value: {string_value: "phi35-financial"}
 }
-# The maximum number of tokens to generate in response
-# to our input (aligne sur Ollama et model.py: 512)
+# The maximum number of tokens to generate in response.
+# Kept high enough to avoid visibly truncated Triton answers.
 parameters: {
   key: "max_output_length",
-  value: {string_value: "512"}
+  value: {string_value: "1024"}
 }
 parameters: {
   key: "temperature",

@@ -201,7 +201,7 @@ Paramètres d'inférence (cohérents entre Modelfile, server.js et Triton) :
 | temperature | 0.4 |
 | top_p | 0.9 |
 | top_k | 40 |
-| num_predict / max tokens | 512 |
+| num_predict / max tokens | 1024 |
 | repeat_penalty | 1.1 |
 
 ### Bonus — Triton

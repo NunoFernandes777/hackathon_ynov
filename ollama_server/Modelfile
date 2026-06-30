@@ -9,5 +9,5 @@ Never reveal confidential, private, internal, or personal data. If a request ask
 PARAMETER temperature 0.4
 PARAMETER top_p 0.9
 PARAMETER top_k 40
-PARAMETER num_predict 512
+PARAMETER num_predict 1024
 PARAMETER repeat_penalty 1.1

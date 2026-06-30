@@ -8,14 +8,14 @@
   </head>
   <body>
     <main class="shell">
-      <aside class="sidebar">
+      <aside class="sidebar" aria-label="Configuration du chat">
         <div class="brand-block">
           <p class="eyebrow brand-name">TechCorp Industries</p>
         </div>
 
-        <section class="status-panel">
+        <section class="status-panel" aria-labelledby="statusTitle">
           <div class="panel-heading">
-            <span>Infrastructure</span>
+            <span id="statusTitle">Infrastructure</span>
             <span id="connectionLabel" class="pill">Verification...</span>
           </div>
           <div class="status-row">
@@ -28,7 +28,7 @@
           </div>
         </section>
 
-        <section class="controls">
+        <section class="controls" aria-label="Parametres d'inference">
           <label>
             Serveur
             <select id="provider">
@@ -37,7 +37,7 @@
             </select>
           </label>
 
-          <div class="readonly-field" aria-label="Modele utilise">
+          <div class="readonly-field" role="group" aria-label="Modele utilise">
             <span class="readonly-label">Modele</span>
             <span id="modelName" class="readonly-value">phi35-financial</span>
           </div>
@@ -51,14 +51,14 @@
           </label>
         </section>
 
-        <section class="quick-prompts">
-          <p class="section-title">Prompts rapides</p>
+        <section class="quick-prompts" aria-labelledby="promptsTitle">
+          <p id="promptsTitle" class="section-title">Prompts rapides</p>
           <button type="button" class="prompt-chip" data-prompt="Explique en francais, en 5 lignes maximum, pourquoi la diversification reduit le risque d'un portefeuille financier.">Diversification</button>
           <button type="button" class="prompt-chip" data-prompt="Analyse les principaux risques financiers d'une entreprise qui augmente fortement son endettement.">Risque dette</button>
           <button type="button" class="prompt-chip" data-prompt="Resume les indicateurs a regarder avant un investissement long terme.">Investissement</button>
         </section>
 
-        <button id="clearBtn" type="button">Nouvelle conversation</button>
+        <button id="clearBtn" class="secondary-action" type="button">Nouvelle conversation</button>
       </aside>
 
       <section class="chat">
@@ -72,12 +72,11 @@
           </div>
         </header>
 
-        <div id="messages" class="messages" aria-live="polite"></div>
+        <div id="messages" class="messages" aria-live="polite" aria-label="Conversation"></div>
 
-        <form id="chatForm" class="composer">
+        <form id="chatForm" class="composer" aria-label="Envoyer un message">
           <div class="input-wrap">
             <textarea id="prompt" rows="2" placeholder="Posez une question financiere..." required></textarea>
-            <span class="hint">Entrer pour envoyer, Shift + Entrer pour une nouvelle ligne</span>
           </div>
           <button id="sendBtn" type="submit">Envoyer</button>
         </form>

@@ -1,16 +1,29 @@
-const messagesEl = document.querySelector("#messages");
-const chatForm = document.querySelector("#chatForm");
-const promptEl = document.querySelector("#prompt");
-const providerEl = document.querySelector("#provider");
-const sendBtn = document.querySelector("#sendBtn");
-const clearBtn = document.querySelector("#clearBtn");
-const tempEl = document.querySelector("#temperature");
-const tempValueEl = document.querySelector("#tempValue");
-const connectionLabel = document.querySelector("#connectionLabel");
-const activeProviderEl = document.querySelector("#activeProvider");
-const ollamaDot = document.querySelector("#ollamaDot");
-const tritonDot = document.querySelector("#tritonDot");
-const promptChips = document.querySelectorAll("[data-prompt]");
+const DEFAULT_MODEL = "phi35-financial";
+const HEALTH_REFRESH_MS = 10000;
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+const elements = {
+  messages: $("#messages"),
+  chatForm: $("#chatForm"),
+  prompt: $("#prompt"),
+  provider: $("#provider"),
+  sendBtn: $("#sendBtn"),
+  clearBtn: $("#clearBtn"),
+  temperature: $("#temperature"),
+  tempValue: $("#tempValue"),
+  connectionLabel: $("#connectionLabel"),
+  activeProvider: $("#activeProvider"),
+  ollamaDot: $("#ollamaDot"),
+  tritonDot: $("#tritonDot"),
+  promptChips: $$("[data-prompt]"),
+};
+
+const providerLabels = {
+  ollama: "Ollama",
+  triton: "Triton",
+};
 
 const history = [
   {
@@ -20,124 +33,147 @@ const history = [
   },
 ];
 
-const providerLabels = {
-  ollama: "Ollama",
-  triton: "Triton",
-};
-const DEFAULT_MODEL = "phi35-financial";
+function setServiceStatus(dot, isOnline) {
+  dot.classList.toggle("ok", isOnline);
+  dot.classList.toggle("fail", !isOnline);
+}
+
+function setSending(isSending) {
+  elements.sendBtn.disabled = isSending;
+  elements.prompt.disabled = isSending;
+  elements.sendBtn.textContent = isSending ? "Envoi..." : "Envoyer";
+}
+
+function autoResizePrompt() {
+  elements.prompt.style.height = "auto";
+  elements.prompt.style.height = `${Math.min(elements.prompt.scrollHeight, 130)}px`;
+}
 
 function renderMessages() {
-  messagesEl.innerHTML = "";
+  elements.messages.innerHTML = "";
+
   for (const message of history) {
     const item = document.createElement("article");
-    item.className = `message ${message.role}`;
     const role = document.createElement("span");
+    const content = document.createElement("div");
+
+    item.className = `message ${message.role}`;
     role.className = "role";
     role.textContent =
       message.role === "user" ? "Vous" : message.role === "error" ? "Erreur" : `Assistant ${message.provider || ""}`;
-    const content = document.createElement("div");
     content.textContent = message.content;
+
     item.append(role, content);
-    messagesEl.appendChild(item);
+    elements.messages.appendChild(item);
   }
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  elements.messages.scrollTop = elements.messages.scrollHeight;
 }
 
-function setDot(dot, ok) {
-  dot.classList.toggle("ok", ok);
-  dot.classList.toggle("fail", !ok);
-}
-
-function syncProviderControls() {
-  activeProviderEl.textContent = providerLabels[providerEl.value] || providerEl.value;
+function syncProviderLabel() {
+  elements.activeProvider.textContent = providerLabels[elements.provider.value] || elements.provider.value;
 }
 
 async function refreshHealth() {
   try {
     const response = await fetch("/api/health");
     const health = await response.json();
-    setDot(ollamaDot, health.ollama);
-    setDot(tritonDot, health.triton);
-    const active = providerEl.value === "triton" ? health.triton : health.ollama;
-    connectionLabel.textContent = active ? "Connecte" : "Deconnecte";
-    connectionLabel.classList.toggle("fail", !active);
+
+    setServiceStatus(elements.ollamaDot, Boolean(health.ollama));
+    setServiceStatus(elements.tritonDot, Boolean(health.triton));
+
+    const activeProviderIsOnline = elements.provider.value === "triton" ? health.triton : health.ollama;
+    elements.connectionLabel.textContent = activeProviderIsOnline ? "Connecte" : "Deconnecte";
+    elements.connectionLabel.classList.toggle("fail", !activeProviderIsOnline);
   } catch {
-    setDot(ollamaDot, false);
-    setDot(tritonDot, false);
-    connectionLabel.textContent = "Deconnecte";
-    connectionLabel.classList.add("fail");
+    setServiceStatus(elements.ollamaDot, false);
+    setServiceStatus(elements.tritonDot, false);
+    elements.connectionLabel.textContent = "Deconnecte";
+    elements.connectionLabel.classList.add("fail");
   }
 }
 
 async function sendMessage(content) {
   history.push({ role: "user", content });
   renderMessages();
-  sendBtn.disabled = true;
-  sendBtn.textContent = "Envoi...";
+  setSending(true);
 
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        provider: providerEl.value,
+        provider: elements.provider.value,
         model: DEFAULT_MODEL,
-        temperature: tempEl.value,
+        temperature: elements.temperature.value,
         messages: history.filter((message) => message.role !== "error"),
       }),
     });
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Erreur API");
-    history.push({ role: "assistant", provider: providerLabels[data.provider] || "", content: data.text || "Reponse vide." });
+
+    history.push({
+      role: "assistant",
+      provider: providerLabels[data.provider] || "",
+      content: data.text || "Reponse vide.",
+    });
   } catch (error) {
     history.push({
       role: "error",
-      content: `${providerLabels[providerEl.value]} indisponible: ${error.message}`,
+      content: `${providerLabels[elements.provider.value]} indisponible: ${error.message}`,
     });
   } finally {
-    sendBtn.disabled = false;
-    sendBtn.textContent = "Envoyer";
+    setSending(false);
     renderMessages();
     refreshHealth();
   }
 }
 
-chatForm.addEventListener("submit", (event) => {
+elements.chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const content = promptEl.value.trim();
+
+  const content = elements.prompt.value.trim();
   if (!content) return;
-  promptEl.value = "";
+
+  elements.prompt.value = "";
+  autoResizePrompt();
   sendMessage(content);
 });
 
-promptEl.addEventListener("keydown", (event) => {
+elements.prompt.addEventListener("input", autoResizePrompt);
+elements.prompt.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
-    chatForm.requestSubmit();
+    elements.chatForm.requestSubmit();
   }
 });
 
-clearBtn.addEventListener("click", () => {
+elements.clearBtn.addEventListener("click", () => {
   history.splice(1);
   renderMessages();
+  elements.prompt.focus();
 });
 
-providerEl.addEventListener("change", () => {
-  syncProviderControls();
+elements.provider.addEventListener("change", () => {
+  syncProviderLabel();
   refreshHealth();
 });
-tempEl.addEventListener("input", () => {
-  tempValueEl.textContent = Number(tempEl.value).toFixed(2);
+
+elements.temperature.addEventListener("input", () => {
+  elements.tempValue.textContent = Number(elements.temperature.value).toFixed(2);
 });
 
-promptChips.forEach((chip) => {
+elements.promptChips.forEach((chip) => {
   chip.addEventListener("click", () => {
-    promptEl.value = chip.dataset.prompt || "";
-    promptEl.focus();
+    elements.prompt.value = chip.dataset.prompt || "";
+    autoResizePrompt();
+    elements.prompt.focus();
   });
 });
 
 renderMessages();
-syncProviderControls();
+syncProviderLabel();
+autoResizePrompt();
 refreshHealth();
-setInterval(refreshHealth, 10000);
+setInterval(refreshHealth, HEALTH_REFRESH_MS);

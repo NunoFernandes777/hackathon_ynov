@@ -19,7 +19,7 @@ class TritonPythonModel:
             "string_value", os.environ.get("OLLAMA_MODEL", "phi35-financial")
         )
         self.max_output_length = int(
-            self.model_params.get("max_output_length", {}).get("string_value", "512")
+            self.model_params.get("max_output_length", {}).get("string_value", "1024")
         )
         self.temperature = float(self.model_params.get("temperature", {}).get("string_value", "0.4"))
         self.top_p = float(self.model_params.get("top_p", {}).get("string_value", "0.9"))

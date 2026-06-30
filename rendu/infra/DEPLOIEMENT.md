@@ -45,7 +45,7 @@ Documentation detaillee: `rendu/infra/TRITON_BONUS.md`.
 
 - temperature: `0.4`
 - top_p: `0.9`
-- max tokens: `512`
+- max tokens: `1024`
 - repetition penalty Ollama: `1.1`
 
 Ces valeurs privilegient des reponses stables pour un assistant financier.

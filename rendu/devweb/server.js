@@ -7,6 +7,7 @@ const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const TRITON_URL = process.env.TRITON_URL || "http://localhost:8000";
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "phi35-financial";
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 240000);
+const DEFAULT_MAX_TOKENS = Number(process.env.MAX_TOKENS || 1024);
 
 const publicDir = __dirname;
 
@@ -66,7 +67,7 @@ async function proxyOllamaChat(payload) {
   const options = {
     temperature: Number(payload.temperature ?? 0.4),
     top_p: Number(payload.top_p ?? 0.9),
-    num_predict: Number(payload.max_tokens ?? 512),
+    num_predict: Number(payload.max_tokens ?? DEFAULT_MAX_TOKENS),
   };
 
   const response = await fetchWithTimeout(`${OLLAMA_URL}/api/chat`, {
@@ -113,7 +114,7 @@ async function proxyOllamaChat(payload) {
 
 async function proxyTritonChat(payload) {
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  const prompt = getLastUserMessage(messages) || payload.prompt || "";
+  const prompt = messages.length ? formatPrompt(messages) : payload.prompt || getLastUserMessage(messages);
   if (!prompt.trim()) {
     throw new Error("Triton requires a non-empty prompt.");
   }

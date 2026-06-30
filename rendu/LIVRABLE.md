@@ -26,7 +26,7 @@ L'équipe technique précédente a été licenciée pour **soupçons de compromi
 | 4 | Documentation de déploiement (choix justifié) | INFRA | ✅ | `rendu/infra/DEPLOIEMENT.md` |
 | 5 | **Bonus** Triton Inference Server (config fournie) | INFRA | ✅ | `docker-compose.triton.yml`, `tritton_server/`, `model_repository/`, `rendu/infra/TRITON_BONUS.md` |
 | 6 | Validation et tests du modèle Phi-3.5-Financial | IA | ✅ | `rendu/ia/VALIDATION_MODELE.md`, `rendu/ia/test_results.md` |
-| 7 | Optimisation des paramètres d'inférence | IA | ✅ | temperature 0.4 / top_p 0.9 / top_k 40 / 512 tokens / repeat 1.1 |
+| 7 | Optimisation des paramètres d'inférence | IA | ✅ | temperature 0.4 / top_p 0.9 / top_k 40 / 1024 tokens / repeat 1.1 |
 | 8 | Fine-tuning LoRA d'un modèle médical | IA / R&D | 🧪 Plan documenté | `medical_project/Readme.md`, `rendu/ia/VALIDATION_MODELE.md` §R&D |
 | 9 | Tests de performance du modèle expérimental | IA / R&D | 🧪 À produire sur Colab | Métriques attendues listées (§4) |
 | 10 | Analyse + nettoyage du dataset | DATA | ✅ | `rendu/data/analyze_datasets.py`, `clean_finance_dataset.py` |
@@ -63,7 +63,7 @@ Bonus      : Navigateur → Node.js (proxy) → Triton HTTP → backend Python �
 | temperature | 0.4 | 0.4 | 0.4 |
 | top_p | 0.9 | 0.9 | 0.9 |
 | top_k | 40 | — | — |
-| max tokens | 512 | 512 | 512 |
+| max tokens | 1024 | 1024 | 1024 |
 | repeat_penalty | 1.1 | — | — |
 
 ### Vérification
@@ -191,7 +191,7 @@ Résultat attendu : **refus clair**, pas de header d'exfiltration, pas de metada
 | Correctif | Fichier | Raison |
 |---|---|---|
 | Payload Triton shape `[1]` | `rendu/devweb/server.js` | Conformité à `config.pbtxt` (`dims: [1]`) |
-| `max_output_length` 80 → 512 | `model_repository/phi35_financial/config.pbtxt` | Cohérence avec Ollama (512) et `model.py` ; évitait des réponses tronquées via Triton |
+| `max_output_length` 80 → 1024 | `model_repository/phi35_financial/config.pbtxt` | Cohérence avec Ollama (1024) et `model.py` ; évite des réponses tronquées via Triton |
 | Option `--summary` | `rendu/cyber/security_audit.py` | Rapport exploitable en soutenance |
 | `.gitignore` complété | `.gitignore` | Exclure `__pycache__`, `*.pyc`, logs runtime, `*.exe`, installeurs |
 | `.pyc` versionné retiré | `model_repository/.../model.cpython-310.pyc` | Artefact ajouté avant la règle `.gitignore`, retiré du suivi |
