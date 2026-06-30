@@ -1,0 +1,21 @@
+services:
+  triton:
+    build:
+      context: .
+      dockerfile: tritton_server/Dockerfile
+    image: techcorp-triton:latest
+    command: tritonserver --model-repository=/models --http-port=8000 --grpc-port=8001 --metrics-port=8002
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+    environment:
+      TRANSFORMERS_CACHE: /cache/huggingface
+      HF_HOME: /cache/huggingface
+    volumes:
+      - ./model_repository:/models:ro
+      - ./models/phi3_financial:/opt/tritonserver/models/phi3_financial:ro
+      - triton_hf_cache:/cache/huggingface
+
+volumes:
+  triton_hf_cache:

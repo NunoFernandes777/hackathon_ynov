@@ -1,8 +1,8 @@
 # Deploiement TechCorp AI Chat
 
-## Choix recommande
+## Deploiement valide: Ollama
 
-Pour la demonstration locale, le chemin le plus rapide est Ollama:
+Pour la demonstration locale, le chemin valide et recommande est Ollama:
 
 ```powershell
 ollama create phi35-financial -f .\ollama_server\Modelfile
@@ -20,25 +20,25 @@ node .\server.js
 
 Ouvrir `http://localhost:3000`.
 
-## Option Triton
+## Bonus: option Triton
 
 Le backend Triton Python est configure dans `model_repository/phi35_financial`.
 Il charge le modele de base `microsoft/Phi-3-mini-4k-instruct` puis l'adapter LoRA local `models/phi3_financial`.
 
-Build:
+Pre-requis: Docker Desktop doit etre lance.
 
 ```powershell
-docker build -t techcorp-triton -f .\tritton_server\Dockerfile .
+docker compose -f .\docker-compose.triton.yml build
+docker compose -f .\docker-compose.triton.yml up
 ```
 
-Run:
+Verifier:
 
 ```powershell
-docker run --rm --gpus all -p 8000:8000 -p 8001:8001 -p 8002:8002 `
-  -v ${PWD}\model_repository:/opt/tritonserver/model_repository `
-  -v ${PWD}\models\phi3_financial:/opt/tritonserver/models/phi3_financial `
-  techcorp-triton tritonserver --model-repository=/opt/tritonserver/model_repository
+python .\rendu\infra\triton_smoke_test.py
 ```
+
+Documentation detaillee: `rendu/infra/TRITON_BONUS.md`.
 
 ## Parametres d'inference
 
@@ -51,6 +51,7 @@ Ces valeurs privilegient des reponses stables pour un assistant financier.
 
 ## Limites constatees
 
-- `ollama` n'etait pas present dans le PATH de cette machine au moment de la preparation.
+- Ollama est le chemin production valide pour la demo.
+- Triton est prepare comme bonus, mais necessite Docker Desktop actif et un premier telechargement lourd.
 - L'adapter fourni indique comme base `microsoft/Phi-3-mini-4k-instruct`; la configuration Triton a donc ete alignee sur cette base pour eviter un mismatch.
 - Le dataset de test contient des exemples hors finance; il doit etre filtre avant tout nouveau fine-tuning.

@@ -93,10 +93,11 @@ async function proxyTritonChat(payload) {
 
   const data = await response.json();
   const output = data.outputs?.find((item) => item.name === "text_output");
+  const outputData = Array.isArray(output?.data) ? output.data.flat(Infinity) : [];
   return {
     provider: "triton",
     model: "phi35_financial",
-    text: Array.isArray(output?.data) ? output.data.join("\n") : "",
+    text: outputData.join("\n"),
   };
 }
 

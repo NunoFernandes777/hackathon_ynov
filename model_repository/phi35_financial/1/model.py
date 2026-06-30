@@ -37,13 +37,16 @@ class TritonPythonModel:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
         self.logger.log_info(f"Loading base model: {hf_model}")
-        model = transformers.AutoModelForCausalLM.from_pretrained(
-            hf_model,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            token=private_repo_token,
-            trust_remote_code=True,
-        )
+        model_kwargs = {
+            "torch_dtype": torch.float16 if torch.cuda.is_available() else torch.float32,
+            "token": private_repo_token,
+            "trust_remote_code": True,
+            "low_cpu_mem_usage": True,
+        }
+        if torch.cuda.is_available():
+            model_kwargs["device_map"] = "auto"
+
+        model = transformers.AutoModelForCausalLM.from_pretrained(hf_model, **model_kwargs)
 
         if adapter_path and os.path.exists(adapter_path):
             self.logger.log_info(f"Loading LoRA adapter: {adapter_path}")
@@ -61,7 +64,8 @@ class TritonPythonModel:
         responses = []
         for request in requests:
             input_tensor = pb_utils.get_input_tensor_by_name(request, "text_input")
-            prompt = input_tensor.as_numpy()[0].decode("utf-8")
+            value = input_tensor.as_numpy().reshape(-1)[0]
+            prompt = value.decode("utf-8") if isinstance(value, bytes) else str(value)
             responses.append(self.generate(prompt))
         return responses
 
