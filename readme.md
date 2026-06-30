@@ -1,178 +1,218 @@
-# 🤖 PROJET TECHCORP - Challenge IA 7h 🤖
+# TechCorp AI Chat - Phi-3.5 Financial
 
-## 📋 BRIEFING DE MISSION
+Projet de reprise technique TechCorp Industries: audit d'un depot herite, nettoyage des donnees compromises, deploiement d'un modele financier via une interface chat, et bonus Triton Inference Server.
 
-**Contexte :** Vous êtes la nouvelle équipe technique de TechCorp Industries. L'équipe précédente a été licenciée suite à des soupçons de compromission du code et des données. Vous devez reprendre leur travail, valider l'intégrité du projet et finaliser le déploiement.
+## Etat du projet
 
-## 🎯 OBJECTIFS PRINCIPAUX
+| Lot | Statut | Details |
+| --- | --- | --- |
+| DEV WEB | OK | Interface chat disponible sur `http://localhost:3000` |
+| INFRA Ollama | OK | Serveur local sur `http://localhost:11434`, modele `phi35-financial` |
+| INFRA Triton bonus | OK | Triton sur `http://localhost:8000`, backend Python proxy vers Ollama |
+| IA production | OK | Tests de reponses documentes dans `rendu/ia/test_results.md` |
+| DATA | OK | Dataset finance nettoye: 2500 lignes gardees, 497 rejetees |
+| CYBER | OK | Audit realise, compromissions identifiees et documentees |
+| R&D medical | Documente | Plan LoRA experimental documente, non deploie en production |
 
-### 🚀 **Mission Critique - Production Ready**
-**Déployer le modèle Phi-3.5-Financial avec une interface chat :**
-- Serveur d'inférence opérationnel avec Phi-3.5-Financial — **au choix de votre équipe** :
-  - **Ollama** (solution clé en main recommandée)
-  - **Triton Inference Server** (solution avancée, configuration fournie)
-  - **Serveur maison** (FastAPI, Flask, vLLM… tout ce qui expose une API)
-- **Interface web obligatoire** pour interagir avec le modèle en temps réel, quelle que soit la solution choisie
-- Documentation technique de votre déploiement
+## Demarrage rapide
 
-### 🔬 **Mission Expérimentale - R&D**
-**Fine-tuner un modèle médical expérimental (pas pour production) :**
-- Fine-tuning LoRA d'un modèle de base avec dataset médical fourni
-- Tests et validation des performances conversationnelles
-- *Note : Ce modèle reste expérimental, pas besoin de le déployer en production*
+### 1. Lancer Ollama
 
-## 📦 CE QUE VOUS AVEZ À DISPOSITION
+Verifier que Ollama est installe et accessible:
 
-### 🏗️ Infrastructure Technique
-- **Ollama** — serveur d'inférence local, solution la plus simple ([ollama.com/download](https://ollama.com/download))
-- **Triton Inference Server** — déploiement avancé, configuration fournie dans `tritton_server/`
-- **Serveur maison** — vous pouvez monter votre propre API (FastAPI, vLLM, llama.cpp…)
-- **Modèle Phi-3.5-Financial** (Entraîné pour la finance/business, prêt à l'emploi voir dans `models/phi3_financial/`)
-- **Dataset médical** pour fine-tuning expérimental
-- **Accès Google Colab Pro** pour le fine-tuning et les tests
-- **Interface web** : obligatoire dans tous les cas pour interagir avec le modèle
-
-### 📁 Fichiers Hérités de l'Équipe Précédente
-- Code d'entraînement et de fine-tuning LoRA pour le modèle financier
-- Modèle Phi-3.5-Financial pré-entraîné
-- Code pour un chatbot de base
-- Quelques configurations de serveurs d'inférence (Ollama, Triton, etc.)
-- Dataset de conversations médicales (format JSON)
-- Documentation technique partielle
-- *Quelques fichiers de logs et notes personnelles laissés sur les machines*
-
-### 💡 **Pistes Techniques Suggérées**
-- **Quantization** : Envisagez des modèles quantisés (4-bit/8-bit) pour optimiser les performances
-- **Backend Python** : Triton supporte un backend Python plus simple que TensorRT
-- **Modèles légers** : Une liste de modèles alternatifs légers est disponible en annexe
-
----
-
-## 👥 RÉPARTITION DES RÔLES PAR FILIÈRE
-
-### 🏗️ **INFRA** - L'Architecte du Système
-
-**Votre Mission :**
-- Choisir et déployer un serveur d'inférence avec le modèle Phi-3.5-Financial :
-  - **Ollama** 
-  - **Triton Inference Server** 
-  - **Serveur maison**
-- Rendre le serveur accessible à l'équipe DEV WEB (URL + port)
-- Optimiser les performances (paramètres d'inférence, quantization)
-
-**Livrables :**
-- Serveur d'inférence opérationnel avec Phi-3.5-Financial
-- Documentation de déploiement (choix technique justifié)
-
----
-
-### 🤖 **IA** - Le Spécialiste Modèles
-
-**Mission Production :**
-- Validation et tests du modèle Phi-3.5-Financial
-- Optimisation des paramètres d'inférence
-
-**Mission Expérimentale :**
-- Fine-tuning LoRA d'un modèle médical avec le dataset fourni
-- Tests de performance du modèle expérimental
-
-**Livrables :**
-- Modèle Phi-3.5-Financial validé et optimisé
-- Modèle médical expérimental fine-tuné (LoRA)
-
----
-
-### 📊 **DATA** - L'Expert Données
-
-**Mission Production :**
-- Validation des données d'entrée pour Phi-3.5-Financial
-- Tests de qualité des conversations
-
-**Mission Expérimentale :**
-- Analyse et nettoyage du dataset médical
-- Préparation des données pour le fine-tuning LoRA
-- Validation de la qualité des conversations médicales
-
-**Livrables :**
-- Dataset médical préparé et nettoyé
-- Rapport de qualité des données
-
----
-
-### 🔒 **CYBER** - Le Responsable Sécurité
-
-**Mission Production :**
-- Audit de sécurité du déploiement (Ollama, Triton, ou serveur maison selon le choix de l'équipe INFRA)
-- Tests de robustesse du modèle Phi-3.5-Financial
-- Validation de l'intégrité des réponses
-
-**Mission Expérimentale :**
-- Tests de sécurité du modèle médical fine-tuné
-- Vérification de l'absence de biais problématiques
-
-**Livrables :**
-- Tests de robustesse validés
-
----
-
-### 🌐 **DEV WEB** - Le Développeur Interface
-
-**Mission Production :**
-- Développer une interface web de chat (obligatoire)
-- Intégrer l'API du serveur d'inférence choisi par l'équipe INFRA pour communiquer avec Phi-3.5-Financial
-  - Ollama : `http://localhost:11434`
-  - Triton : `http://localhost:8000`
-  - Serveur maison : URL communiquée par l'équipe INFRA
-- Interface utilisateur intuitive pour tester le modèle
-
-**Livrables :**
-- Interface web complète et fonctionnelle
-- Intégration API temps réel avec le serveur d'inférence de l'équipe
-
----
-
-
-## 🛠️ RESSOURCES TECHNIQUES FOURNIES
-
-### 📦 **Datasets**
-- **Dataset financier (v0 brut)** : [Dipl0/financial_dataset.json](https://huggingface.co/datasets/Dipl0/financial_dataset.json) — à télécharger manuellement dans `datasets/`
-- **Dataset médical** : [ruslanmv/ai-medical-chatbot](https://huggingface.co/datasets/ruslanmv/ai-medical-chatbot)
-
-### 📁 **Architecture du Projet**
-```
-techcorp-ai-chat/
-├── tritton_server/              # Configuration Triton Inference Server
-├── models/         # Modèle Phi-3.5-Financial
-├── medical_dataset/            # Dataset pour fine-tuning médical expérimental
-├── scripts/                    # Scripts d'entraînement et de tests
-
-
+```powershell
+ollama --version
 ```
 
-### 🧠 **Modèles IA Disponibles**
-1. **Phi-3.5-Financial** - Modèle spécialisé finance/business
+Si PowerShell ne trouve pas `ollama`, ajouter le chemin suivant dans le `Path` utilisateur:
 
-### 💻 **Infrastructure**
-- **Ollama** : serveur d'inférence local, GPU ou CPU 
-- **Triton Inference Server** : déploiement avancé, configuration fournie
-- **Serveur maison** : FastAPI, vLLM, llama.cpp… tout ce qui expose une API REST
-- **Google Colab Pro** : GPU pour fine-tuning et tests
+```text
+C:\Users\pedro\AppData\Local\Programs\Ollama
+```
 
-### 🔧 **Pistes Techniques**
+Puis relancer VS Code ou le terminal.
 
-**Modèles Alternatifs si besoin :**
-- `phi3.5`, `qwen2.5:3b`, `mistral`, `tinyllama`
+Lancer le modele financier:
 
-## 📝 **DOCUMENTATION ET GUIDES**
-### 📚 **Ressource utile : [Déploiement rapide de modèles HuggingFace avec Triton Inference Server](https://github.com/triton-inference-server/tutorials/tree/main/Quick_Deploy/HuggingFaceTransformers)**
-### 📖 **Dataset Médical : [Dataset Hugging Face pour POC](https://huggingface.co/datasets/ruslanmv/ai-medical-chatbot)**
----
+```powershell
+ollama run phi35-financial
+```
 
-## 🎯 MISSION FINALE
+Tester l'API Ollama:
 
-**Votre objectif principal : Rendre le modèle Phi-3.5-Financial accessible via une interface chat professionnelle — peu importe le serveur d'inférence choisi (Ollama, Triton, ou maison), l'interface est non négociable. Et n'oubliez pas d'expérimenter sur le fine tuning du modèle médical important aussi**
+```powershell
+Invoke-RestMethod http://localhost:11434/api/tags
+```
 
+### 2. Lancer l'interface web
 
-**TechCorp compte sur vous pour finaliser ce projet. Explorez les fichiers laissés par l'équipe précédente, ils peuvent contenir des informations utiles !**
+```powershell
+cd rendu\devweb
+node server.js
+```
 
----
+Ouvrir ensuite:
+
+```text
+http://localhost:3000
+```
+
+L'interface permet de choisir le backend Ollama ou Triton.
+
+### 3. Lancer Triton bonus
+
+Depuis la racine du projet:
+
+```powershell
+docker compose -f docker-compose.triton.yml up -d
+```
+
+Verifier que Triton est pret:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/v2/health/ready
+```
+
+Verifier depuis l'interface web:
+
+```powershell
+Invoke-RestMethod http://localhost:3000/api/health
+```
+
+Reponse attendue:
+
+```json
+{
+  "app": "ok",
+  "ollama": true,
+  "triton": true,
+  "ollamaUrl": "http://localhost:11434",
+  "tritonUrl": "http://localhost:8000",
+  "defaultModel": "phi35-financial"
+}
+```
+
+## Tests utiles
+
+### Smoke test Triton
+
+```powershell
+python .\rendu\infra\triton_smoke_test.py
+```
+
+### Nettoyage DATA
+
+```powershell
+python .\rendu\data\clean_finance_dataset.py
+```
+
+Resultat actuel:
+
+- 2997 lignes analysees
+- 2500 lignes conservees
+- 497 lignes rejetees pour contamination securite
+- sortie: `rendu/data/finance_dataset_clean.json`
+- rapport: `rendu/data/quality_report.json`
+
+### Audit CYBER
+
+```powershell
+python .\rendu\cyber\security_audit.py --summary
+```
+
+Resultat actuel:
+
+- 2639 findings au total
+- 1504 `backdoor_trigger`
+- 744 `privileged_mode`
+- 389 `secret_material`
+- 2 `hidden_header_exfiltration`
+
+Fichiers principaux a risque:
+
+- `datasets/test_dataset_16000.json`
+- `datasets/finance_dataset_final.json`
+- `logs/team_logs_archive.md`
+
+## Architecture
+
+```text
+hackathon_ynov/
+|-- docker-compose.triton.yml
+|-- datasets/
+|-- logs/
+|-- medical_project/
+|-- models/
+|-- model_repository/
+|-- ollama_server/
+|-- rendu/
+|   |-- README_RENDU.md
+|   |-- AUDIT_GLOBAL.md
+|   |-- cyber/
+|   |-- data/
+|   |-- devweb/
+|   |-- ia/
+|   `-- infra/
+|-- scripts/
+`-- tritton_server/
+```
+
+## Choix techniques
+
+### Production
+
+La solution production principale utilise Ollama, car c'est le chemin le plus stable pour exposer rapidement le modele Phi-3.5-Financial en local avec une API HTTP.
+
+Flux:
+
+```text
+Navigateur -> Interface web Node.js -> Ollama API -> phi35-financial
+```
+
+### Bonus Triton
+
+Triton est deploye via Docker avec un backend Python. Sur cette machine, le chargement direct complet du modele HuggingFace dans Docker depassait la memoire locale disponible. Le backend Triton joue donc le role de passerelle d'inference vers Ollama:
+
+```text
+Navigateur -> Interface web Node.js -> Triton HTTP API -> Backend Python -> Ollama -> phi35-financial
+```
+
+Ce choix valide le bonus Triton tout en gardant une execution fiable sur l'environnement local.
+
+## Documentation de rendu
+
+- Rendu principal: `rendu/README_RENDU.md`
+- Audit global: `rendu/AUDIT_GLOBAL.md`
+- Deploiement: `rendu/infra/DEPLOIEMENT.md`
+- Triton bonus: `rendu/infra/TRITON_BONUS.md`
+- Validation IA: `rendu/ia/VALIDATION_MODELE.md`
+- Resultats de tests IA: `rendu/ia/test_results.md`
+- Rapport DATA: `rendu/data/RAPPORT_DATA.md`
+- Rapport CYBER: `rendu/cyber/RAPPORT_SECURITE.md`
+- Interface web: `rendu/devweb/README.md`
+
+## Exemple de test en francais
+
+Prompt conseille dans l'interface:
+
+```text
+Explique en francais, en 5 lignes maximum, pourquoi la diversification reduit le risque d'un portefeuille financier.
+```
+
+Pour Triton, selectionner le backend Triton dans l'interface puis envoyer le meme prompt.
+
+## Notes importantes
+
+- Ne pas entrainer ou deployer a partir des datasets bruts compromis.
+- Utiliser le dataset nettoye dans `rendu/data/finance_dataset_clean.json`.
+- Le modele medical reste experimental et ne doit pas etre expose en production.
+- Le depot contient volontairement des artefacts suspects herites de l'ancienne equipe; ils sont documentes dans les rapports DATA et CYBER.
+
+## Pitch de demonstration
+
+1. Montrer `http://localhost:3000`.
+2. Envoyer un prompt financier en francais avec le backend Ollama.
+3. Basculer sur Triton et refaire un test court.
+4. Ouvrir `/api/health` pour montrer Ollama et Triton en vert.
+5. Presenter le nettoyage DATA et l'audit CYBER.
+6. Conclure avec le plan R&D medical LoRA, separe de la production.

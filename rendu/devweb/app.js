@@ -19,6 +19,11 @@ const history = [
   },
 ];
 
+const providerLabels = {
+  ollama: "Ollama",
+  triton: "Triton",
+};
+
 function renderMessages() {
   messagesEl.innerHTML = "";
   for (const message of history) {
@@ -26,7 +31,8 @@ function renderMessages() {
     item.className = `message ${message.role}`;
     const role = document.createElement("span");
     role.className = "role";
-    role.textContent = message.role === "user" ? "Vous" : message.role === "error" ? "Erreur" : "Assistant";
+    role.textContent =
+      message.role === "user" ? "Vous" : message.role === "error" ? "Erreur" : `Assistant ${message.provider || ""}`;
     const content = document.createElement("div");
     content.textContent = message.content;
     item.append(role, content);
@@ -38,6 +44,12 @@ function renderMessages() {
 function setDot(dot, ok) {
   dot.classList.toggle("ok", ok);
   dot.classList.toggle("fail", !ok);
+}
+
+function syncProviderControls() {
+  const isTriton = providerEl.value === "triton";
+  modelEl.disabled = isTriton;
+  modelEl.title = isTriton ? "Triton utilise le modele phi35_financial configure cote serveur." : "";
 }
 
 async function refreshHealth() {
@@ -76,9 +88,12 @@ async function sendMessage(content) {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Erreur API");
-    history.push({ role: "assistant", content: data.text || "Reponse vide." });
+    history.push({ role: "assistant", provider: providerLabels[data.provider] || "", content: data.text || "Reponse vide." });
   } catch (error) {
-    history.push({ role: "error", content: error.message });
+    history.push({
+      role: "error",
+      content: `${providerLabels[providerEl.value]} indisponible: ${error.message}`,
+    });
   } finally {
     sendBtn.disabled = false;
     sendBtn.textContent = "Envoyer";
@@ -95,16 +110,27 @@ chatForm.addEventListener("submit", (event) => {
   sendMessage(content);
 });
 
+promptEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    chatForm.requestSubmit();
+  }
+});
+
 clearBtn.addEventListener("click", () => {
   history.splice(1);
   renderMessages();
 });
 
-providerEl.addEventListener("change", refreshHealth);
+providerEl.addEventListener("change", () => {
+  syncProviderControls();
+  refreshHealth();
+});
 tempEl.addEventListener("input", () => {
   tempValueEl.textContent = Number(tempEl.value).toFixed(2);
 });
 
 renderMessages();
+syncProviderControls();
 refreshHealth();
 setInterval(refreshHealth, 10000);

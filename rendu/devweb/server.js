@@ -6,8 +6,15 @@ const PORT = Number(process.env.PORT || 3000);
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const TRITON_URL = process.env.TRITON_URL || "http://localhost:8000";
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "phi35-financial";
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 240000);
 
 const publicDir = __dirname;
+
+function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+}
 
 function sendJson(res, status, payload) {
   const body = JSON.stringify(payload);
@@ -39,39 +46,79 @@ function readJson(req) {
   });
 }
 
+function getLastUserMessage(messages) {
+  return [...messages].reverse().find((message) => message.role === "user")?.content || "";
+}
+
+function formatPrompt(messages) {
+  const turns = messages
+    .filter((message) => ["user", "assistant"].includes(message.role) && message.content)
+    .map((message) => {
+      const role = message.role === "user" ? "User" : "Assistant";
+      return `${role}: ${message.content}`;
+    });
+  return `${turns.join("\n")}\nAssistant:`;
+}
+
 async function proxyOllamaChat(payload) {
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+  const model = payload.model || DEFAULT_MODEL;
+  const options = {
+    temperature: Number(payload.temperature ?? 0.4),
+    top_p: Number(payload.top_p ?? 0.9),
+    num_predict: Number(payload.max_tokens ?? 512),
+  };
+
+  const response = await fetchWithTimeout(`${OLLAMA_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: payload.model || DEFAULT_MODEL,
+      model,
       messages,
       stream: false,
-      options: {
-        temperature: Number(payload.temperature ?? 0.4),
-        top_p: Number(payload.top_p ?? 0.9),
-        num_predict: Number(payload.max_tokens ?? 512),
-      },
+      options,
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Ollama HTTP ${response.status}: ${await response.text()}`);
+    const chatError = await response.text();
+    const fallback = await fetchWithTimeout(`${OLLAMA_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        prompt: formatPrompt(messages),
+        stream: false,
+        options,
+      }),
+    });
+    if (!fallback.ok) {
+      throw new Error(`Ollama HTTP ${response.status}: ${chatError}; fallback ${fallback.status}: ${await fallback.text()}`);
+    }
+    const fallbackData = await fallback.json();
+    return {
+      provider: "ollama",
+      model: fallbackData.model || model,
+      text: fallbackData.response || "",
+    };
   }
 
   const data = await response.json();
   return {
     provider: "ollama",
-    model: data.model || payload.model || DEFAULT_MODEL,
+    model: data.model || model,
     text: data.message?.content || data.response || "",
   };
 }
 
 async function proxyTritonChat(payload) {
-  const lastUserMessage = [...(payload.messages || [])].reverse().find((m) => m.role === "user");
-  const prompt = lastUserMessage?.content || payload.prompt || "";
-  const response = await fetch(`${TRITON_URL}/v2/models/phi35_financial/infer`, {
+  const messages = Array.isArray(payload.messages) ? payload.messages : [];
+  const prompt = getLastUserMessage(messages) || payload.prompt || "";
+  if (!prompt.trim()) {
+    throw new Error("Triton requires a non-empty prompt.");
+  }
+
+  const response = await fetchWithTimeout(`${TRITON_URL}/v2/models/phi35_financial/infer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -104,8 +151,8 @@ async function proxyTritonChat(payload) {
 async function handleApi(req, res) {
   if (req.method === "GET" && req.url === "/api/health") {
     const checks = await Promise.allSettled([
-      fetch(`${OLLAMA_URL}/api/tags`),
-      fetch(`${TRITON_URL}/v2/health/ready`),
+      fetchWithTimeout(`${OLLAMA_URL}/api/tags`, {}, 5000),
+      fetchWithTimeout(`${TRITON_URL}/v2/health/ready`, {}, 5000),
     ]);
     return sendJson(res, 200, {
       app: "ok",
@@ -121,10 +168,14 @@ async function handleApi(req, res) {
     try {
       const payload = await readJson(req);
       const provider = payload.provider || "ollama";
+      if (!["ollama", "triton"].includes(provider)) {
+        return sendJson(res, 400, { error: `Unknown provider: ${provider}` });
+      }
       const result = provider === "triton" ? await proxyTritonChat(payload) : await proxyOllamaChat(payload);
       return sendJson(res, 200, result);
     } catch (error) {
-      return sendJson(res, 502, { error: error.message });
+      const message = error.name === "AbortError" ? "Inference request timed out." : error.message;
+      return sendJson(res, 502, { error: message });
     }
   }
 
@@ -169,4 +220,9 @@ server.listen(PORT, () => {
   console.log(`TechCorp chat UI: http://localhost:${PORT}`);
   console.log(`Ollama target: ${OLLAMA_URL} / model ${DEFAULT_MODEL}`);
   console.log(`Triton target: ${TRITON_URL}`);
+});
+
+server.on("error", (error) => {
+  console.error(`Server failed: ${error.message}`);
+  process.exitCode = 1;
 });
