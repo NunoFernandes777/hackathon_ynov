@@ -2,14 +2,15 @@ const messagesEl = document.querySelector("#messages");
 const chatForm = document.querySelector("#chatForm");
 const promptEl = document.querySelector("#prompt");
 const providerEl = document.querySelector("#provider");
-const modelEl = document.querySelector("#model");
 const sendBtn = document.querySelector("#sendBtn");
 const clearBtn = document.querySelector("#clearBtn");
 const tempEl = document.querySelector("#temperature");
 const tempValueEl = document.querySelector("#tempValue");
 const connectionLabel = document.querySelector("#connectionLabel");
+const activeProviderEl = document.querySelector("#activeProvider");
 const ollamaDot = document.querySelector("#ollamaDot");
 const tritonDot = document.querySelector("#tritonDot");
+const promptChips = document.querySelectorAll("[data-prompt]");
 
 const history = [
   {
@@ -23,6 +24,7 @@ const providerLabels = {
   ollama: "Ollama",
   triton: "Triton",
 };
+const DEFAULT_MODEL = "phi35-financial";
 
 function renderMessages() {
   messagesEl.innerHTML = "";
@@ -47,9 +49,7 @@ function setDot(dot, ok) {
 }
 
 function syncProviderControls() {
-  const isTriton = providerEl.value === "triton";
-  modelEl.disabled = isTriton;
-  modelEl.title = isTriton ? "Triton utilise le modele phi35_financial configure cote serveur." : "";
+  activeProviderEl.textContent = providerLabels[providerEl.value] || providerEl.value;
 }
 
 async function refreshHealth() {
@@ -60,12 +60,12 @@ async function refreshHealth() {
     setDot(tritonDot, health.triton);
     const active = providerEl.value === "triton" ? health.triton : health.ollama;
     connectionLabel.textContent = active ? "Connecte" : "Deconnecte";
-    connectionLabel.style.color = active ? "var(--brand)" : "var(--danger)";
+    connectionLabel.classList.toggle("fail", !active);
   } catch {
     setDot(ollamaDot, false);
     setDot(tritonDot, false);
     connectionLabel.textContent = "Deconnecte";
-    connectionLabel.style.color = "var(--danger)";
+    connectionLabel.classList.add("fail");
   }
 }
 
@@ -81,7 +81,7 @@ async function sendMessage(content) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         provider: providerEl.value,
-        model: modelEl.value.trim(),
+        model: DEFAULT_MODEL,
         temperature: tempEl.value,
         messages: history.filter((message) => message.role !== "error"),
       }),
@@ -128,6 +128,13 @@ providerEl.addEventListener("change", () => {
 });
 tempEl.addEventListener("input", () => {
   tempValueEl.textContent = Number(tempEl.value).toFixed(2);
+});
+
+promptChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    promptEl.value = chip.dataset.prompt || "";
+    promptEl.focus();
+  });
 });
 
 renderMessages();

@@ -9,40 +9,54 @@
   <body>
     <main class="shell">
       <aside class="sidebar">
-        <div>
-          <p class="eyebrow">TechCorp Industries</p>
-          <h1>Phi-3.5 Financial</h1>
+        <div class="brand-block">
+          <p class="eyebrow brand-name">TechCorp Industries</p>
         </div>
 
         <section class="status-panel">
-          <div class="status-row">
-            <span id="ollamaDot" class="dot"></span>
-            <span>Ollama</span>
+          <div class="panel-heading">
+            <span>Infrastructure</span>
+            <span id="connectionLabel" class="pill">Verification...</span>
           </div>
           <div class="status-row">
-            <span id="tritonDot" class="dot"></span>
-            <span>Triton</span>
+            <span class="status-name"><span id="ollamaDot" class="dot"></span>Ollama</span>
+            <span class="endpoint">:11434</span>
+          </div>
+          <div class="status-row">
+            <span class="status-name"><span id="tritonDot" class="dot"></span>Triton</span>
+            <span class="endpoint">:8000</span>
           </div>
         </section>
 
-        <label>
-          Serveur
-          <select id="provider">
-            <option value="ollama">Ollama : localhost:11434</option>
-            <option value="triton">Triton : localhost:8000</option>
-          </select>
-        </label>
+        <section class="controls">
+          <label>
+            Serveur
+            <select id="provider">
+              <option value="ollama">Ollama</option>
+              <option value="triton">Triton</option>
+            </select>
+          </label>
 
-        <label>
-          Modele
-          <input id="model" value="phi35-financial" />
-        </label>
+          <div class="readonly-field" aria-label="Modele utilise">
+            <span class="readonly-label">Modele</span>
+            <span id="modelName" class="readonly-value">phi35-financial</span>
+          </div>
 
-        <label>
-          Temperature
-          <input id="temperature" type="range" min="0" max="1" step="0.05" value="0.4" />
-          <span id="tempValue">0.40</span>
-        </label>
+          <label>
+            <span class="label-line">
+              Temperature
+              <span id="tempValue" class="value-chip">0.40</span>
+            </span>
+            <input id="temperature" type="range" min="0" max="1" step="0.05" value="0.4" />
+          </label>
+        </section>
+
+        <section class="quick-prompts">
+          <p class="section-title">Prompts rapides</p>
+          <button type="button" class="prompt-chip" data-prompt="Explique en francais, en 5 lignes maximum, pourquoi la diversification reduit le risque d'un portefeuille financier.">Diversification</button>
+          <button type="button" class="prompt-chip" data-prompt="Analyse les principaux risques financiers d'une entreprise qui augmente fortement son endettement.">Risque dette</button>
+          <button type="button" class="prompt-chip" data-prompt="Resume les indicateurs a regarder avant un investissement long terme.">Investissement</button>
+        </section>
 
         <button id="clearBtn" type="button">Nouvelle conversation</button>
       </aside>
@@ -51,15 +65,20 @@
         <header class="chat-header">
           <div>
             <p class="eyebrow">Assistant financier interne</p>
-            <h2>Analyse, budget, investissement, risques</h2>
+            <h2>Assistant financier</h2>
           </div>
-          <span id="connectionLabel" class="pill">Verification...</span>
+          <div class="header-actions">
+            <span id="activeProvider" class="backend-tag">Ollama</span>
+          </div>
         </header>
 
         <div id="messages" class="messages" aria-live="polite"></div>
 
         <form id="chatForm" class="composer">
-          <textarea id="prompt" rows="2" placeholder="Posez une question financiere..." required></textarea>
+          <div class="input-wrap">
+            <textarea id="prompt" rows="2" placeholder="Posez une question financiere..." required></textarea>
+            <span class="hint">Entrer pour envoyer, Shift + Entrer pour une nouvelle ligne</span>
+          </div>
           <button id="sendBtn" type="submit">Envoyer</button>
         </form>
       </section>
