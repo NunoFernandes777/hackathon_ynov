@@ -45,10 +45,10 @@ Documentation detaillee: `rendu/infra/TRITON_BONUS.md`.
 
 - temperature: `0.4`
 - top_p: `0.9`
-- max tokens: `1024`
+- max tokens: `1024` cote modele/Triton; `384` par defaut dans l'interface web pour eviter les timeouts CPU locaux
 - repetition penalty Ollama: `1.1`
 
-Ces valeurs privilegient des reponses stables pour un assistant financier.
+Ces valeurs privilegient des reponses stables pour un assistant financier. La limite plus basse dans l'interface garde la demo reactive sur CPU local; elle peut etre augmentee avec `MAX_TOKENS`.
 
 ## Limites constatees
 

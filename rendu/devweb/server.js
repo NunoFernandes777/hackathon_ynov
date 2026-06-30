@@ -6,8 +6,8 @@ const PORT = Number(process.env.PORT || 3000);
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const TRITON_URL = process.env.TRITON_URL || "http://localhost:8000";
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "phi35-financial";
-const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 240000);
-const DEFAULT_MAX_TOKENS = Number(process.env.MAX_TOKENS || 1024);
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 360000);
+const DEFAULT_MAX_TOKENS = Number(process.env.MAX_TOKENS || 384);
 
 const publicDir = __dirname;
 

@@ -194,14 +194,14 @@ Le chemin de production retenu est **Ollama** : c'est la voie la plus stable pou
 Navigateur → Interface web Node.js → Ollama API → phi35-financial
 ```
 
-Paramètres d'inférence (cohérents entre Modelfile, server.js et Triton) :
+Paramètres d'inférence :
 
 | Paramètre | Valeur |
 | --- | --- |
 | temperature | 0.4 |
 | top_p | 0.9 |
 | top_k | 40 |
-| num_predict / max tokens | 1024 |
+| num_predict / max tokens | 1024 max cote modele/Triton, 384 par defaut dans l'interface web |
 | repeat_penalty | 1.1 |
 
 ### Bonus — Triton

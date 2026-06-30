@@ -63,7 +63,7 @@ Bonus      : Navigateur → Node.js (proxy) → Triton HTTP → backend Python �
 | temperature | 0.4 | 0.4 | 0.4 |
 | top_p | 0.9 | 0.9 | 0.9 |
 | top_k | 40 | — | — |
-| max tokens | 1024 | 1024 | 1024 |
+| max tokens | 1024 | 1024 | 384 par defaut (`MAX_TOKENS` configurable) |
 | repeat_penalty | 1.1 | — | — |
 
 ### Vérification
