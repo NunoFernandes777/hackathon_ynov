@@ -1,5 +1,8 @@
 # Rendu TechCorp AI Chat
 
+> Synthèse complète mappée sur le PDF de mission : voir `rendu/LIVRABLE.md`.
+> Pré-requis : `git lfs install && git lfs pull` après le clone, sinon les datasets/rapports/modèle restent des pointeurs LFS et les scripts DATA/CYBER échouent.
+
 ## Statut
 
 Le deploiement principal et le bonus sont valides localement.

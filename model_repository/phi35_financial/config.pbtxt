@@ -11,10 +11,10 @@ parameters: {
   value: {string_value: "phi35-financial"}
 }
 # The maximum number of tokens to generate in response
-# to our input
+# to our input (aligne sur Ollama et model.py: 512)
 parameters: {
   key: "max_output_length",
-  value: {string_value: "80"}
+  value: {string_value: "512"}
 }
 parameters: {
   key: "temperature",

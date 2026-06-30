@@ -6,8 +6,22 @@
 - JavaScript compile correctement: proxy web et interface chat.
 - JSON valide: datasets, tokenizer/config modele, rapports generes.
 - Interface web disponible via `rendu/devweb/server.js`.
-- Le fichier `models/phi3_financial/adapter_model.safetensors` est un vrai modele LoRA local, pas un pointeur Git LFS casse. Taille observee: 30,434,208 octets.
-- SHA256 du LoRA: `B907135BFD68D07C0EC1C625F41493C83F29AFD89204AFB7478E9520EBEF4087`.
+- Le modele LoRA `models/phi3_financial/adapter_model.safetensors` est suivi via Git LFS. Une fois hydrate (`git lfs pull`), il fait 30 434 208 octets et son SHA256 est `b907135bfd68d07c0ec1c625f41493c83f29afd89204afb7478e9520ebef4087`. Avant hydratation, le fichier present est un pointeur LFS de ~130 octets: c'est normal, pas une corruption.
+
+## Pre-requis Git LFS (important)
+
+Les fichiers lourds ou binaires (`*.json` des datasets et rapports, `*.safetensors`) sont suivis via Git LFS (voir `.gitattributes`). Apres un `git clone`, il faut hydrater LFS pour obtenir les vrais contenus, sinon ces fichiers restent des pointeurs de ~130 octets et les scripts DATA/CYBER echouent avec une erreur JSON:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+Verification rapide (un vrai dataset fait plusieurs Mo, un pointeur ~130 octets):
+
+```bash
+wc -c datasets/finance_dataset_final.json
+```
 
 ## Erreurs corrigees
 
